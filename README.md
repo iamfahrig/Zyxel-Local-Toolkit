@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#usage)
 [![Release: v1.0.0](https://img.shields.io/badge/Release-v1.0.0-brightgreen.svg)](https://github.com/iamfahrig/Zyxel-Local-Toolkit/releases)
+[![Downloads](https://img.shields.io/github/downloads/iamfahrig/Zyxel-Local-Toolkit/total?color=blue)](https://github.com/iamfahrig/Zyxel-Local-Toolkit/releases)
 [![Hardware](https://img.shields.io/badge/Hardware-Zyxel%20NR%20Series-green.svg)](#supported-hardware)
 
 > 🌐 **Language / Dil:** &nbsp; [ **English** ](README.md) &nbsp;•&nbsp; [ **Türkçe** ](README_TR.md)

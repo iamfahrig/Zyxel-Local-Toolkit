@@ -5,6 +5,7 @@
 [![Lisans: MIT](https://img.shields.io/badge/Lisans-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue.svg)](#kullanım)
 [![Sürüm: v1.0.0](https://img.shields.io/badge/Surum-v1.0.0-brightgreen.svg)](https://github.com/iamfahrig/Zyxel-Local-Toolkit/releases)
+[![İndirme](https://img.shields.io/github/downloads/iamfahrig/Zyxel-Local-Toolkit/total?label=%C4%B0ndirme&color=blue)](https://github.com/iamfahrig/Zyxel-Local-Toolkit/releases)
 [![Donanım](https://img.shields.io/badge/Donanım-Zyxel%20NR%20Serisi-green.svg)](#desteklenen-donanım)
 
 > 🌐 **Dil / Language:** &nbsp; [ **Türkçe** ](README_TR.md) &nbsp;•&nbsp; [ **English** ](README.md)
