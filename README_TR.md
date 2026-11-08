@@ -69,7 +69,7 @@ Kullanıma hazır paketi aşağıdaki yöntemlerden biriyle edinebilirsiniz:
 
 | Yöntem | Bağlantı / Komut | Açıklama |
 |:---|:---|:---|
-| **v1.0.0 Paketi (ZIP)** | [**Zyxel-Local-Toolkit-v1.0.0.zip İndir**](https://github.com/iamfahrig/Zyxel-Local-Toolkit/archive/refs/tags/v1.0.0.zip) | Doğrulanmış kararlı sürüm, indir ve çalıştır |
+| **v1.0.0 Paketi (ZIP)** | [**Zyxel-Local-Toolkit-v1.0.0.zip İndir**](https://github.com/iamfahrig/Zyxel-Local-Toolkit/releases/download/v1.0.0/Zyxel-Local-Toolkit-v1.0.0.zip) | Doğrulanmış resmi sürüm paketi, indir ve çalıştır |
 | **En Güncel Kod (ZIP)** | [**Güncel ZIP Paketini İndir**](https://github.com/iamfahrig/Zyxel-Local-Toolkit/archive/refs/heads/main.zip) | `main` dalındaki en son dosyaları tek tıkla indirir |
 | **GitHub Sürümleri** | [**Releases Sayfası**](https://github.com/iamfahrig/Zyxel-Local-Toolkit/releases) | Paketlenmiş resmi sürümler ve sürüm notları |
 | **Git ile Klonlama** | `git clone https://github.com/iamfahrig/Zyxel-Local-Toolkit.git` | Geliştiriciler ve terminal kullanıcıları için |

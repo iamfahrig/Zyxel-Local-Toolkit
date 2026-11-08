@@ -69,7 +69,7 @@ Get the ready-to-run package using any of the following methods:
 
 | Method | Link / Action | Details |
 |:---|:---|:---|
-| **Release v1.0.0 (ZIP)** | [**Download Zyxel-Local-Toolkit-v1.0.0.zip**](https://github.com/iamfahrig/Zyxel-Local-Toolkit/archive/refs/tags/v1.0.0.zip) | Verified stable release, extract and run |
+| **Release v1.0.0 (ZIP)** | [**Download Zyxel-Local-Toolkit-v1.0.0.zip**](https://github.com/iamfahrig/Zyxel-Local-Toolkit/releases/download/v1.0.0/Zyxel-Local-Toolkit-v1.0.0.zip) | Verified official release package, extract and run |
 | **Latest Source (ZIP)** | [**Download Latest ZIP**](https://github.com/iamfahrig/Zyxel-Local-Toolkit/archive/refs/heads/main.zip) | Direct download from `main` branch |
 | **GitHub Releases** | [**View Releases Page**](https://github.com/iamfahrig/Zyxel-Local-Toolkit/releases) | Packaged zip releases, assets & changelog |
 | **Git Clone** | `git clone https://github.com/iamfahrig/Zyxel-Local-Toolkit.git` | Recommended for developers and terminal users |
