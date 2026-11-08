@@ -107,6 +107,7 @@ Default username: **admin**
   * **SSH:** `ssh root@192.168.1.1` (Port: 22, Password: your router web password)
   * **Web:** `http://192.168.1.1` (Username: `admin`)
   * **FTP:** `ftp://192.168.1.1` (Port: 21)
+  * **Telnet:** `telnet 192.168.1.1 23`
 * **Account Roles:**
   * `admin` → Default privileged web interface account
   * `root` → Privileged shell and FTP account

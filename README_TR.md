@@ -103,14 +103,15 @@ Varsayılan giriş kullanıcı adı: **admin**
 
 ### 4. İşlem Sonrası
 * **Mod 1 veya 3:** Cihaz yeniden başlar. 5G ve Wi-Fi bağlantısının oturması **90-120 saniye** sürer. Bu sürede fişi çekmeyin.  
-* **Mod 1 sonrası erişim örnekleri:**  
-  * SSH: `ssh root@192.168.1.1` (port: 22, şifre: modem web şifreniz)  
-  * Web: `http://192.168.1.1` (kullanıcı: admin)  
-  * FTP: `ftp://192.168.1.1` (port: 21)  
-* **Hesap yapısı (Mod 1 sonrası):**  
+* **Mod 1 sonrası erişim:**  
+  * **SSH:** `ssh root@192.168.1.1` (Port: 22, Şifre: modem web şifreniz)  
+  * **Web:** `http://192.168.1.1` (Kullanıcı: `admin`)  
+  * **FTP:** `ftp://192.168.1.1` (Port: 21)  
+  * **Telnet:** `telnet 192.168.1.1 23`
+* **Hesap Rolleri (Mod 1 sonrası):**  
   * `admin` → Varsayılan yetkili web hesabı  
-  * `sUser` → Yetkili hesap  
-  * `root` → SSH, FTP gibi servislerde kullanılan hesap  
+  * `root` → Yetkili kabuk (SSH) ve FTP hesabı  
+  * `sUser` → Yetkili sistem hesabı  
 * **Mod 2:** Cihaz yeniden başlamaz. `yedek_*/zcfg_config.json` dosyası oluşur.
 
 ---
