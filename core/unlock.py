@@ -177,7 +177,13 @@ def get_modem_session(host, password, opener, cj):
 
     return None
 
-def optimize_config(cfg, all_pages):
+def optimize_config(cfg, all_pages, expose_wan=False):
+    # expose_wan=False (varsayilan): Servisler YALNIZCA yerel ag (LAN) icin acilir.
+    # expose_wan=True : Kullanici bilerek sectiginde servisler WAN (internet)
+    #                   tarafina da acilir. Bu, SSH/Telnet/FTP'yi disariya actigi
+    #                   icin ciddi bir guvenlik riskidir; yalnizca bilinli kullanim.
+    scope_access = "LAN,WAN" if expose_wan else "LAN"
+    scope_mode = "LAN_WAN" if expose_wan else "LAN"
     print(" [*] Yapilandirma Alanlari Yerel Varsayilanlara Uyarlaniyor:")
     if "X_ZYXEL_LoginCfg" in cfg and isinstance(cfg["X_ZYXEL_LoginCfg"], dict):
         adm_pass = None
@@ -197,9 +203,9 @@ def optimize_config(cfg, all_pages):
             gp["HiddenPage"] = ""
             for acc in gp.get("Account", []):
                 acc["Enabled"] = True
-                acc["RemoteAccessPrivilege"] = "LAN,WAN"
+                acc["RemoteAccessPrivilege"] = scope_access
                 acc["GetConfigByFtp"] = True
-                acc["ConfigAccountFromWAN"] = True
+                acc["ConfigAccountFromWAN"] = expose_wan
                 acc["Page"] = all_pages
                 acc["HiddenPage"] = ""
                 if acc.get("Username") in ("sUser", "root") and adm_pass:
@@ -216,9 +222,9 @@ def optimize_config(cfg, all_pages):
                     if name in ("SSH", "TELNET", "FTP", "HTTP", "HTTPS", "PING"):
                         s["Enable"] = True
                         if "Mode" in s:
-                            s["Mode"] = "LAN_WAN"
+                            s["Mode"] = scope_mode
                         if "TrustAll" in s:
-                            s["TrustAll"] = True
+                            s["TrustAll"] = expose_wan
                         if name == "SSH":
                             s["Port"] = 22
                         elif name == "FTP":
@@ -228,7 +234,8 @@ def optimize_config(cfg, all_pages):
                     elif name == "TR069":
                         s["Enable"] = False
                         s["Port"] = 0
-        print("   -> [RemoteManagement]     : Yerel teshis portlari etkinlestirildi (SSH:22, Telnet:23, FTP:21, Web:80/443).")
+        scope_note = "LAN + WAN (internet'e ACIK - riskli)" if expose_wan else "yalnizca LAN"
+        print(f"   -> [RemoteManagement]     : Teshis portlari etkinlestirildi [{scope_note}] (SSH:22, Telnet:23, FTP:21, Web:80/443).")
 
     if "ManagementServer" in cfg and isinstance(cfg["ManagementServer"], dict):
         ms = cfg["ManagementServer"]
@@ -449,6 +456,7 @@ def main():
                 print(f"   - Open JSON (.json): {json_out}\n")
                 print(" Device configuration has not been modified.")
                 print(" You can inspect or edit this JSON file for research or customization.")
+                print(" NOTE: These backup files contain account passwords. Do NOT share them.")
                 print(" After editing, use option [3] to restore it back to the device.")
             else:
                 print(" [OK] YAPILANDIRMA PAKETI BASARIYLA ACILDI VE KAYDEDILDI")
@@ -458,6 +466,7 @@ def main():
                 print(f"   - Acik Nesne (.json): {json_out}\n")
                 print(" Cihaz uzerinde herhangi bir durum degisikligi yapilmadi.")
                 print(" JSON dosyasini egitim ve guvenlik analizi amaciyla inceleyebilirsiniz.")
+                print(" NOT: Bu yedek dosyalari hesap sifrelerini icerir. Baskalariyla PAYLASMAYIN.")
                 print(" Duzenleme sonrasi [3] secenegi ile modeminize geri yukleyebilirsiniz.")
             print("=========================================================================\n")
             sys.exit(0)
@@ -466,9 +475,38 @@ def main():
             print(arch_ok)
 
     if selected == 1:
+        if is_en:
+            print("\n  SERVICE ACCESS SCOPE:")
+            print("  -----------------------------------------------------------------------")
+            print("    [1] LAN only  (recommended) - services reachable only on local network")
+            print("    [2] LAN + WAN (risky)       - also exposes SSH/Telnet/FTP to the internet")
+            print("  -----------------------------------------------------------------------")
+            scope_prompt = "  Select Scope [1 / 2, Enter = 1]: "
+            warn_wan = "  [!] WARNING: Services will be exposed to the WAN/internet side. Only choose this if you understand the risk."
+        else:
+            print("\n  SERVIS ERISIM KAPSAMI:")
+            print("  -----------------------------------------------------------------------")
+            print("    [1] Yalnizca LAN (onerilen) - Servislere sadece yerel agdan erisilir")
+            print("    [2] LAN + WAN (riskli)      - SSH/Telnet/FTP internete de ACILIR")
+            print("  -----------------------------------------------------------------------")
+            scope_prompt = "  Kapsam Seciniz [1 / 2, Enter = 1]: "
+            warn_wan = "  [!] UYARI: Servisler WAN/internet tarafina acilacak. Riski biliyorsaniz secin."
+        expose_wan = False
+        while True:
+            scope_choice = input(scope_prompt).strip()
+            if not scope_choice or scope_choice == "1":
+                expose_wan = False
+                break
+            elif scope_choice == "2":
+                print(warn_wan)
+                expose_wan = True
+                break
+            else:
+                print("  [!] Lutfen 1 veya 2 giriniz." if not is_en else "  [!] Please enter 1 or 2.")
+
         opt_msg = "\n[*] Applying interoperability and local diagnostic parameters..." if is_en else "\n[*] Birlikte calisabilirlik ve yerel servis parametreleri uyarlaniyor..."
         print(opt_msg)
-        optimize_config(cfg, ALL_PAGES)
+        optimize_config(cfg, ALL_PAGES, expose_wan)
 
     pack_msg = "\n[*] Repacking configuration into hardware binary format..." if is_en else "\n[*] Yeni donanim paketi hazirlaniyor ve paketleniyor..."
     print(pack_msg)

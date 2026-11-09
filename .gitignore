@@ -1,0 +1,17 @@
+# Yedek ve yapilandirma ciktilari (hesap sifreleri icerir - ASLA push edilmemeli)
+# Backup and config outputs (contain account passwords - must NEVER be pushed)
+yedek_*/
+*.bin
+*.json
+zcfg_config.json
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/

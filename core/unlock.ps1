@@ -2,7 +2,8 @@
     [string]$TargetIP   = '',
     [string]$TargetPass = '',
     [string]$ConfigKey  = 'N3z0y93',
-    [int]$ActionOption  = 0
+    [int]$ActionOption  = 0,
+    [switch]$AllowWan
 )
 
 $ErrorActionPreference = 'Stop'
@@ -256,7 +257,12 @@ function Get-ModemSession([string]$HostAddress, [string]$Password, [System.Net.C
     return $null
 }
 
-function Optimize-ConfigObject($Config, [string[]]$AllPages) {
+function Optimize-ConfigObject($Config, [string[]]$AllPages, [bool]$ExposeWan = $false) {
+    # ExposeWan=$false (varsayilan): Servisler YALNIZCA yerel ag (LAN) icin acilir.
+    # ExposeWan=$true : Kullanici bilerek sectiginde servisler WAN (internet) tarafina
+    #                   da acilir. SSH/Telnet/FTP'yi disariya actigi icin risklidir.
+    $scopeAccess = if ($ExposeWan) { 'LAN,WAN' } else { 'LAN' }
+    $scopeMode   = if ($ExposeWan) { 'LAN_WAN' } else { 'LAN' }
     Write-Host " [*] Yapilandirma Alanlari Yerel Varsayilanlara Uyarlaniyor:" -ForegroundColor Cyan
 
     if ($Config.X_ZYXEL_LoginCfg) {
@@ -286,9 +292,9 @@ function Optimize-ConfigObject($Config, [string[]]$AllPages) {
             if ($group.Account) {
                 foreach ($account in $group.Account) {
                     Set-ConfigValue $account 'Enabled' $true
-                    Set-ConfigValue $account 'RemoteAccessPrivilege' 'LAN,WAN'
+                    Set-ConfigValue $account 'RemoteAccessPrivilege' $scopeAccess
                     Set-ConfigValue $account 'GetConfigByFtp' $true
-                    Set-ConfigValue $account 'ConfigAccountFromWAN' $true
+                    Set-ConfigValue $account 'ConfigAccountFromWAN' $ExposeWan
                     Set-ConfigValue $account 'Page' $AllPages
                     Set-ConfigValue $account 'HiddenPage' ''
 
@@ -310,8 +316,8 @@ function Optimize-ConfigObject($Config, [string[]]$AllPages) {
                 foreach ($service in $serviceGroup) {
                     if ($service.Name -in @('SSH', 'TELNET', 'FTP', 'HTTP', 'HTTPS', 'PING')) {
                         $service.Enable = $true
-                        if ($service.PSObject.Properties['Mode'])     { $service.Mode = 'LAN_WAN' }
-                        if ($service.PSObject.Properties['TrustAll']) { $service.TrustAll = $true }
+                        if ($service.PSObject.Properties['Mode'])     { $service.Mode = $scopeMode }
+                        if ($service.PSObject.Properties['TrustAll']) { $service.TrustAll = $ExposeWan }
                         if ($service.Name -eq 'SSH')    { $service.Port = 22 }
                         if ($service.Name -eq 'FTP')    { $service.Port = 21 }
                         if ($service.Name -eq 'TELNET') { $service.Port = 23 }
@@ -323,7 +329,8 @@ function Optimize-ConfigObject($Config, [string[]]$AllPages) {
                 }
             }
         }
-        Write-Host "   -> [RemoteManagement]     : Yerel teshis portlari etkinlestirildi (SSH 22, Telnet 23, FTP 21, Web 80/443)." -ForegroundColor Green
+        $scopeNote = if ($ExposeWan) { 'LAN + WAN (internet e ACIK - riskli)' } else { 'yalnizca LAN' }
+        Write-Host "   -> [RemoteManagement]     : Teshis portlari etkinlestirildi [$scopeNote] (SSH 22, Telnet 23, FTP 21, Web 80/443)." -ForegroundColor Green
     }
 
     if ($Config.ManagementServer) {
@@ -604,6 +611,7 @@ if ($SelectedAction -in 1, 2) {
             Write-Host ""
             Write-Host " Device configuration has not been modified." -ForegroundColor Yellow
             Write-Host " You can inspect or edit this JSON file for research or customization." -ForegroundColor Cyan
+            Write-Host " NOTE: These backup files contain account passwords. Do NOT share them." -ForegroundColor Yellow
             Write-Host " After editing, use option [3] to restore it back to the device." -ForegroundColor Cyan
         } else {
             Write-Host " [OK] YAPILANDIRMA PAKETI BASARIYLA ACILDI VE KAYDEDILDI" -ForegroundColor Green
@@ -615,6 +623,7 @@ if ($SelectedAction -in 1, 2) {
             Write-Host ""
             Write-Host " Cihaz uzerinde herhangi bir durum degisikligi yapilmadi." -ForegroundColor Yellow
             Write-Host " JSON dosyasini egitim ve guvenlik analizi amaciyla inceleyebilirsiniz." -ForegroundColor Cyan
+            Write-Host " NOT: Bu yedek dosyalari hesap sifrelerini icerir. Baskalariyla PAYLASMAYIN." -ForegroundColor Yellow
             Write-Host " Duzenleme sonrasi [3] secenegi ile modeminize geri yukleyebilirsiniz." -ForegroundColor Cyan
         }
         Write-Host "=========================================================================`n"
@@ -626,9 +635,35 @@ if ($SelectedAction -in 1, 2) {
 }
 
 if ($SelectedAction -eq 1) {
+    $exposeWan = [bool]$AllowWan
+    if (-not $AllowWan) {
+        if ($isEn) {
+            Write-Host "`n  SERVICE ACCESS SCOPE:" -ForegroundColor Yellow
+            Write-Host "  -----------------------------------------------------------------------" -ForegroundColor DarkCyan
+            Write-Host "    [1] LAN only  (recommended) - services reachable only on local network" -ForegroundColor White
+            Write-Host "    [2] LAN + WAN (risky)       - also exposes SSH/Telnet/FTP to the internet" -ForegroundColor White
+            Write-Host "  -----------------------------------------------------------------------" -ForegroundColor DarkCyan
+            $scopePrompt = "  Select Scope [1 / 2, Enter = 1]: "
+            $warnWan = "  [!] WARNING: Services will be exposed to the WAN/internet side. Only choose this if you understand the risk."
+        } else {
+            Write-Host "`n  SERVIS ERISIM KAPSAMI:" -ForegroundColor Yellow
+            Write-Host "  -----------------------------------------------------------------------" -ForegroundColor DarkCyan
+            Write-Host "    [1] Yalnizca LAN (onerilen) - Servislere sadece yerel agdan erisilir" -ForegroundColor White
+            Write-Host "    [2] LAN + WAN (riskli)      - SSH/Telnet/FTP internete de ACILIR" -ForegroundColor White
+            Write-Host "  -----------------------------------------------------------------------" -ForegroundColor DarkCyan
+            $scopePrompt = "  Kapsam Seciniz [1 / 2, Enter = 1]: "
+            $warnWan = "  [!] UYARI: Servisler WAN/internet tarafina acilacak. Riski biliyorsaniz secin."
+        }
+        while ($true) {
+            $scopeChoice = (Read-Host $scopePrompt).Trim()
+            if ([string]::IsNullOrWhiteSpace($scopeChoice) -or $scopeChoice -eq '1') { $exposeWan = $false; break }
+            elseif ($scopeChoice -eq '2') { Write-Host $warnWan -ForegroundColor Yellow; $exposeWan = $true; break }
+            else { Write-Host "  [!] Lutfen 1 veya 2 giriniz. / Please enter 1 or 2." -ForegroundColor Yellow }
+        }
+    }
     $optMsg = if ($isEn) { "`n[*] Applying interoperability and local diagnostic parameters..." } else { "`n[*] Birlikte calisabilirlik ve yerel servis parametreleri uyarlaniyor..." }
     Write-Host $optMsg -ForegroundColor Cyan
-    Optimize-ConfigObject -Config $cfg -AllPages $ALL_PAGES
+    Optimize-ConfigObject -Config $cfg -AllPages $ALL_PAGES -ExposeWan $exposeWan
 }
 
 $packMsg = if ($isEn) { "`n[*] Repacking configuration into hardware binary format..." } else { "`n[*] Yeni donanim paketi hazirlaniyor ve paketleniyor..." }
